@@ -14,3 +14,5 @@ MNIST_data/train-labels-idx1-ubyte
 .idea/ImageProcessing.iml
 
 *.xml
+
+*.pkl
