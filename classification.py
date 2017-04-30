@@ -1,9 +1,5 @@
 import tensorflow as tf
-import numpy as np
-from PIL import Image
 from datasets import imnist
-from utils.labelFile2Map import *
-# number 1 to 10 data
 
 mnist = imnist.read_data_sets('./MNIST_data/', one_hot=True)
 
