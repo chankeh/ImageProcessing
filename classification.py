@@ -1,11 +1,11 @@
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-from tensorflow.examples.tutorials.mnist import input_data
-from loadData import process_train
+from datasets import imnist
 from utils.labelFile2Map import *
 # number 1 to 10 data
-mnist = input_data.read_data_sets('./MNIST_data', one_hot=True)
+
+mnist = imnist.read_data_sets('./MNIST_data/', one_hot=True)
 
 def compute_accuracy(v_xs, v_ys):
     global prediction
@@ -65,64 +65,20 @@ b_fc2 = bias_variable([10])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
 
+
 # the error between prediction and real data
 cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction),
                                               reduction_indices=[1]))       # loss
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
 sess = tf.Session()
-sess.run(tf.global_variables_initializer())
 
-def np_ndarry(index):
-    label = np.zeros(10)
-    for i in range(10):
-        if index == i:
-            label[i] = 1
-    return label
+init = tf.global_variables_initializer()
+sess.run(init)
 
-## train data
-image_root = "./MNIST_data/"
-train_label = "./MNIST_data/mnist_train/train.txt"
-test_label = "./MNIST_data/mnist_train/test.txt"
-
-lines = readLines(train_label)
-label_record = map(lines)
-train_dir = image_root + "mnist_train/"
-print len(label_record)
-index = 0
-batch_xs = np.ndarray([100,784])
-batch_ys = np.ndarray([100, 10])
-for name in label_record:
-    # print label_record[name]
-    image = Image.open(train_dir + str(label_record[name]) + '/' + name)
-    print "training %d: " % index + train_dir + str(label_record[name]) + '/' + name
-    img_ndarray = np.asarray(image, dtype='float64') / 256
-    _xs = np.ndarray.flatten(img_ndarray)
-    _ys = np.ndarray.flatten(np_ndarry(int(label_record[name])))
-    batch_xs[(index % 100)][:] = _xs
-    batch_ys[(index % 100)][:] = _ys
-    index = index + 1
-    if index % 100 == 0:
-        batch_xs = np.ndarray.resize(batch_xs, [100, 784])
-        batch_ys = np.ndarray.resize(batch_ys, [100, 10])
-        sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
-        batch_xs = []
-        batch_ys = []
-    # if index % 100 == 0:
-    #     sess.run(train_step, feed_dict={xs: _xs, ys: _ys, keep_prob: 0.5})
-    #     batch_xs = []
-    #     batch_ys = []
-    if index % 5000 == 0:
-        print(compute_accuracy(batch_xs, batch_ys))
-        # write_file = open('../PKLDataset/olivettifaces.pkl', 'wb')
-        # cPickle.dump(train_images, write_file, -1)
-        # cPickle.dump(train_labels, write_file, -1)
-        # write_file.close()
-## data
-
-# for index in range(60000):
-#
-#     sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
-    # if index % 5000 == 0:
-    #     print(compute_accuracy(
-    #         mnist.test.images, mnist.test.labels))
+for i in range(1000):
+    batch_xs, batch_ys = mnist.train.next_batch(100)
+    sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
+    if i % 50 == 0:
+        print(compute_accuracy(
+            mnist.test.images, mnist.test.labels))

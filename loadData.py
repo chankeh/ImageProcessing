@@ -1,39 +1,45 @@
 # -*- coding: utf-8 -*-
 import cPickle
 import numpy
+import utils.fileUtil as file
 from PIL import Image
 from utils.labelFile2Map import *
 
-i = 0;
-
-train_images = numpy.empty((60000, 784))
-train_labels = numpy.empty(60000)
-
-image_root = "./MNIST_data/"
-train_label = "./MNIST_data/mnist_train/train.txt"
-test_label = "./MNIST_data/mnist_train/test.txt"
-
-def process_train():
-    lines = readLines(train_label)
+def process_images(label_file, one_hot=False, num_classes=10):
+    if file.getFileName(label_file) == 'train.txt':
+        images = numpy.empty((60000, 784))
+        labels = numpy.empty(60000)
+    if file.getFileName(label_file) == 'test.txt':
+        images = numpy.empty((10000, 784))
+        labels = numpy.empty(10000)
+    lines = readLines(label_file)
     label_record = map(lines)
-    train_dir = image_root + "mnist_train/"
+    file_name_length = len(file.getFileName(label_file))
+    image_dir = label_file[:-1*file_name_length]
     print len(label_record)
     index = 0
     for name in label_record:
         # print label_record[name]
-        image = Image.open(train_dir + str(label_record[name]) + '/' + name)
-        print "processing %d: " % index + train_dir + str(label_record[name]) + '/' + name
+        image = Image.open(image_dir + str(label_record[name]) + '/' + name)
+        print "processing %d: " % index + image_dir + str(label_record[name]) + '/' + name
 
         img_ndarray = numpy.asarray(image, dtype='float64') / 256
-        train_images[index] = numpy.ndarray.flatten(img_ndarray)
-        train_labels[index] = numpy.int(label_record[name])
+        images[index] = numpy.ndarray.flatten(img_ndarray)
+        labels[index] = numpy.int(label_record[name])
 
-        # write_file = open('../PKLDataset/olivettifaces.pkl', 'wb')
-        # cPickle.dump(train_images, write_file, -1)
-        # cPickle.dump(train_labels, write_file, -1)
-        # write_file.close()
         index = index + 1
-    return train_images, train_labels
+    print index
+    num_images = index
+    rows = 28
+    cols = 28
+    # print train_images.reshape(num_images, rows, cols, 1)numpy.fromarrays(train_labels,)
+    # print numpy.array(train_labels, dtype=numpy.uint8)
+    if one_hot:
+      return images.reshape(num_images, rows, cols, 1), dense_to_one_hot(numpy.array(labels, dtype=numpy.uint8), num_classes)
+    return images.reshape(num_images, rows, cols, 1), numpy.array(labels, dtype=numpy.uint8)
 
 if __name__ == "__main__":
-    process_train()
+    image_root = "./MNIST_data/"
+    train_label = "./MNIST_data/mnist_train/train.txt"
+    test_label = "./MNIST_data/mnist_test/test.txt"
+    process_images(image_root, train_label)

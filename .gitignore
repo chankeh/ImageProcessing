@@ -16,3 +16,7 @@ MNIST_data/train-labels-idx1-ubyte
 *.xml
 
 *.pkl
+
+datasets/__init__.pyc
+
+*.pyc
