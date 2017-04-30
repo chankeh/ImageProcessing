@@ -19,8 +19,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import gzip
-
 import numpy
 import utils.fileUtil as file
 from datasets import base
@@ -53,7 +51,7 @@ def process_images(label_file, one_hot=False, num_classes=10):
         image = Image.open(image_dir + str(label_record[name]) + '/' + name)
         print("processing %d: " % index + image_dir + str(label_record[name]) + '/' + name)
 
-        img_ndarray = numpy.asarray(image, dtype='float64') / 256
+        img_ndarray = numpy.asarray(image, dtype='float32')
         images[index] = numpy.ndarray.flatten(img_ndarray)
         labels[index] = numpy.int(label_record[name])
 
@@ -114,7 +112,6 @@ def read_data_sets(data_dir,
 
 
 class DataSet(object):
-
   def __init__(self,
                images,
                labels,
@@ -217,8 +214,6 @@ class DataSet(object):
       self._index_in_epoch += batch_size
       end = self._index_in_epoch
       return self._images[start:end], self._labels[start:end]
-
-
 
 
 def load_mnist(train_dir='MNIST-data'):
