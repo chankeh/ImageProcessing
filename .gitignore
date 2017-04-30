@@ -20,3 +20,7 @@ MNIST_data/train-labels-idx1-ubyte
 datasets/__init__.pyc
 
 *.pyc
+
+*.pyc
+
+*.pyc
